@@ -13,7 +13,7 @@
     "invoke": "npm run build && sam local invoke --event event.json",
     "test": "npm run eslint",
     "execute": "babel-node src/index.js",
-    "watch": "nodemon --exec npm run execute"
+    "watch": "TEST=true nodemon --exec npm run execute"
   },
   "keywords": [],
   "author": "",
