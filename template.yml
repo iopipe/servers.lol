@@ -8,7 +8,7 @@ Resources:
       Handler: dist/index.handler
       Runtime: nodejs6.10
       Timeout: 30
-      CodeUri: s3://cost-of-cloud/cost-of-cloud.zip
+      CodeUri: .
       Policies: AWSElasticBeanstalkReadOnlyAccess
       Environment:
         Variables:
