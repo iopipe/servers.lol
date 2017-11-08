@@ -190,6 +190,12 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
+aws-sam-local@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/aws-sam-local/-/aws-sam-local-0.2.2.tgz#e7aaa97b2ebc62f6cdf314133278079d14dc5bde"
+  dependencies:
+    go-npm "^0.1.8"
+
 aws-sdk@^2.142.0:
   version "2.142.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.142.0.tgz#efdf69d2be3132aa51d4e7abb2c28fe42771e3ec"
@@ -1681,6 +1687,14 @@ globby@^5.0.0:
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
 
+go-npm@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/go-npm/-/go-npm-0.1.8.tgz#1ee5a38c10d64c6da0964576cf2f0ea0f54beef9"
+  dependencies:
+    mkdirp "^0.5.1"
+    request "^2.81.0"
+    tar "^2.2.1"
+
 got@^6.7.1:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/got/-/got-6.7.1.tgz#240cd05785a9a18e561dc1b44b41c763ef1e8db0"
@@ -2879,6 +2893,16 @@ p-locate@^2.0.0:
   dependencies:
     p-limit "^1.1.0"
 
+p-reflect@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/p-reflect/-/p-reflect-1.0.0.tgz#f4fa1ee1bb546d8eb3ec0321148dfe0a79137bb8"
+
+p-settle@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/p-settle/-/p-settle-2.0.0.tgz#b6cda5ab86e7173639164909b526adcc42b87733"
+  dependencies:
+    p-reflect "^1.0.0"
+
 package-json@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/package-json/-/package-json-4.0.1.tgz#8869a0401253661c4c4ca3da6c2121ed555f5eed"
@@ -3221,7 +3245,7 @@ request@2.81.0:
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@^2.79.0:
+request@^2.79.0, request@^2.81.0:
   version "2.83.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.83.0.tgz#ca0b65da02ed62935887808e6f510381034e3356"
   dependencies:

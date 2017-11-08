@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Cost of Cloud
+Resources:
+  GetMetrics:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/index.handler
+      Runtime: nodejs6.10
+      Timeout: 30
+      CodeUri: s3://cost-of-cloud/cost-of-cloud.zip
+      Policies: AWSElasticBeanstalkReadOnlyAccess
+      Environment:
+        Variables:
+          NODE_ENV: production
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get

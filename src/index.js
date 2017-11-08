@@ -1,54 +1,107 @@
 import _ from 'lodash';
-import moment from 'moment';
 import AWS from 'aws-sdk';
+import pSettle from 'p-settle';
 
-const eb = new AWS.ElasticBeanstalk();
-const cloudwatch = new AWS.CloudWatch();
-const ec2 = new AWS.EC2();
+const regions = [
+  'ap-northeast-1',
+  'ap-northeast-2',
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'eu-central-1',
+  'eu-west-1',
+  'eu-west-2',
+  'sa-east-1',
+  'ap-south-1',
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2',
+  'ca-central'
+];
 
-async function getEbApps() {
-  // const apps = await eb.describeApplications().promise();
-  const envs = await eb.describeEnvironments().promise();
-  return _.chain(envs)
+async function getEnvironments(region) {
+  const eb = new AWS.ElasticBeanstalk({ region });
+  const res = await eb.describeEnvironments().promise();
+  return _.chain(res)
     .get('Environments')
-    .groupBy('ApplicationName')
+    .map('EnvironmentName')
+    .map(envName => [envName, region])
     .value();
 }
 
-(async () => {
-  // console.log(JSON.stringify(await eb.describeApplications().promise()));
-  // const envs = await getEbApps();
-  // const ec2Metrics = await ec2.describeInstances().promise();
-  // console.log(JSON.stringify(ec2Metrics));
-  // console.log(envs);
-  const params = {
-    StartTime: moment()
-      .subtract(6, 'h')
-      .toDate()
-      .toISOString(),
-    EndTime: moment()
-      .subtract(1, 'h')
-      .toDate()
-      .toISOString(),
-    MetricName: 'ApplicationRequests2xx',
-    // MetricName: 'ApplicationRequestsTotal',
-    // MetricName: 'Invocations',
-    // Namespace: 'AWS/Lambda',
-    Namespace: 'ElasticBeanstalk',
-    // Dimensions: [
-    //   {
-    //     Name: 'EnvironmentName',
-    //     Value: 'iopipe-org-collector-prod'
-    //   }
-    // ],
-    // seconds
-    Period: 300,
-    Statistics: ['Average', 'Sum']
+function coerceMetrics(obj = {}) {
+  const instances = obj.InstanceHealthList;
+  return {
+    instanceCount: instances.length,
+    requestCount: _.chain(instances)
+      .map('ApplicationMetrics.RequestCount')
+      .sum()
+      .value(),
+    cpu: _.chain(instances)
+      .map('System.CPUUtilization')
+      .map(o => {
+        return _.chain(o)
+          .omit(['Idle'])
+          .values()
+          .sum()
+          .value();
+      })
+      .mean()
+      .round(3)
+      .value(),
+    types: _.chain(instances)
+      .map('InstanceType')
+      .value(),
+    latency: _.chain(instances)
+      .map('ApplicationMetrics.Latency.P75')
+      .mean()
+      .multiply(1000)
+      .round()
+      .value()
   };
-  // console.log(
-  //   cloudwatch.getMetricStatistics(params).service.config.credentials
-  // );
-  const res = await cloudwatch.getMetricStatistics(params).promise();
-  console.log('Cloudwatch response:');
-  console.log(JSON.stringify(res));
-})();
+}
+
+async function getEnvironmentMetrics(arr = []) {
+  const [EnvironmentName, region] = arr;
+  const eb = new AWS.ElasticBeanstalk({ region });
+  const metricsRaw = await eb
+    .describeInstancesHealth({
+      AttributeNames: ['All'],
+      EnvironmentName
+    })
+    .promise();
+  const metrics = coerceMetrics(metricsRaw);
+  return {
+    region,
+    env: EnvironmentName,
+    metricsRaw,
+    metrics
+  };
+}
+
+async function getAllMetrics(envs = []) {
+  const settled = await pSettle(envs.map(getEnvironmentMetrics));
+  return _.chain(settled)
+    .filter({ isFulfilled: true })
+    .map('value')
+    .value();
+}
+
+exports.handler = async function get(event, context) {
+  try {
+    const regionEnvs = await pSettle(regions.map(getEnvironments));
+    const envs = _.chain(regionEnvs)
+      .filter({ isFulfilled: true })
+      .map('value')
+      .flatten()
+      .value();
+    const metrics = await getAllMetrics(envs);
+    context.succeed({
+      body: JSON.stringify(metrics)
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+process.env.TEST && exports.handler({}, { succeed: console.log });
