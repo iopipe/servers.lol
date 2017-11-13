@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import AWS from 'aws-sdk';
 import pSettle from 'p-settle';
+import omitDeep from 'omit-deep';
 
 const regions = [
   'ap-northeast-1',
@@ -29,53 +30,20 @@ async function getEnvironments(region) {
     .value();
 }
 
-function coerceMetrics(obj = {}) {
-  const instances = obj.InstanceHealthList;
-  return {
-    instanceCount: instances.length,
-    requestCount: _.chain(instances)
-      .map('ApplicationMetrics.RequestCount')
-      .sum()
-      .value(),
-    cpu: _.chain(instances)
-      .map('System.CPUUtilization')
-      .map(o => {
-        return _.chain(o)
-          .omit(['Idle'])
-          .values()
-          .sum()
-          .value();
-      })
-      .mean()
-      .round(3)
-      .value(),
-    types: _.chain(instances)
-      .map('InstanceType')
-      .value(),
-    latency: _.chain(instances)
-      .map('ApplicationMetrics.Latency.P75')
-      .mean()
-      .multiply(1000)
-      .round()
-      .value()
-  };
-}
-
 async function getEnvironmentMetrics(arr = []) {
   const [EnvironmentName, region] = arr;
   const eb = new AWS.ElasticBeanstalk({ region });
-  const metricsRaw = await eb
+  const metricsRawRes = await eb
     .describeInstancesHealth({
       AttributeNames: ['All'],
       EnvironmentName
     })
     .promise();
-  const metrics = coerceMetrics(metricsRaw);
+  const metricsRaw = omitDeep(metricsRawRes, ['Causes']);
   return {
     region,
-    env: EnvironmentName,
-    metricsRaw,
-    metrics
+    name: EnvironmentName,
+    metricsRaw
   };
 }
 
@@ -87,7 +55,26 @@ async function getAllMetrics(envs = []) {
     .value();
 }
 
+function redirect(event, context) {
+  const results = process.env.FRONTEND || 'http://localhost:3000';
+  context.succeed({
+    body: `<html>
+        <body>Redirecting to your results...</body>
+        <script>
+          var endpoint = window.location.href;
+          window.location = '${results}' + '?endpoint=' + endpoint
+        </script>
+      </html>`,
+    headers: {
+      'Content-Type': 'text/html'
+    }
+  });
+}
+
 exports.handler = async function get(event, context) {
+  if (!event.queryStringParameters.data) {
+    return redirect(event, context);
+  }
   try {
     const regionEnvs = await pSettle(regions.map(getEnvironments));
     const envs = _.chain(regionEnvs)
@@ -96,8 +83,16 @@ exports.handler = async function get(event, context) {
       .flatten()
       .value();
     const metrics = await getAllMetrics(envs);
-    context.succeed({
-      body: JSON.stringify(metrics)
+    const body = _.chain(metrics)
+      // limit results
+      // .map(obj => _.pick(obj, ['region', 'env', 'metrics']))
+      .thru(JSON.stringify)
+      .value();
+    return context.succeed({
+      body,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   } catch (err) {
     throw err;
