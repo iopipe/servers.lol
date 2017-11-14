@@ -56,13 +56,17 @@ async function getAllMetrics(envs = []) {
 }
 
 function redirect(event, context) {
-  const results = process.env.FRONTEND || 'http://localhost:3000';
+  let results = process.env.FRONTEND || 'https://servers.lol';
+  if (process.env.NODE_ENV !== 'production') {
+    results = 'http://localhost:3000';
+  }
+  const { PASSWORD: password } = process.env;
   context.succeed({
     body: `<html>
         <body>Redirecting to your results...</body>
         <script>
           var endpoint = window.location.href;
-          window.location = '${results}' + '?endpoint=' + endpoint
+          window.location = '${results}' + '?endpoint=' + endpoint + '&password=' + '${password}'
         </script>
       </html>`,
     headers: {
@@ -71,9 +75,25 @@ function redirect(event, context) {
   });
 }
 
-exports.handler = async function get(event, context) {
-  if (!event.queryStringParameters.data) {
+function noAuth(event, context) {
+  context.succeed({
+    body: `<html>
+        <body>Incorrect password.</body>
+      </html>`,
+    headers: {
+      'Content-Type': 'text/html'
+    }
+  });
+}
+
+exports.handler = async function get(event = {}, context) {
+  const { data: enableData, password } = event.queryStringParameters;
+  if (!enableData) {
     return redirect(event, context);
+  }
+  console.log(process.env.PASSWORD);
+  if (!password || !process.env.PASSWORD || password !== process.env.PASSWORD) {
+    return noAuth(event, context);
   }
   try {
     const regionEnvs = await pSettle(regions.map(getEnvironments));
@@ -95,4 +115,8 @@ exports.handler = async function get(event, context) {
   }
 };
 
-process.env.TEST && exports.handler({}, { succeed: console.log });
+process.env.TEST &&
+  exports.handler(
+    { queryStringParameters: { data: true } },
+    { succeed: console.log }
+  );

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Cost of Cloud
+Description: Servers.lol
 Resources:
   GetMetrics:
     Type: AWS::Serverless::Function
@@ -13,6 +13,7 @@ Resources:
       Environment:
         Variables:
           NODE_ENV: production
+          PASSWORD: none
       Events:
         GetResource:
           Type: Api

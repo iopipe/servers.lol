@@ -1,19 +1,20 @@
 {
-  "name": "cost-of-cloud",
+  "name": "servers-lol",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "babel": "babel src --out-dir dist",
     "build": "npm run babel",
-    "deploy": "npm run build && npm run package && npm run launch",
+    "deploy": "npm run build && npm run validate && npm run package && npm run launch",
     "eslint": "eslint src",
-    "package": "sam package --template-file template.yml --s3-bucket cost-of-cloud --output-template-file packaged.yml",
-    "launch": "sam deploy --template-file ./packaged.yml --stack-name cost-of-cloud --capabilities CAPABILITY_IAM",
+    "package": "sam package --template-file template.yml --s3-bucket servers-lol --output-template-file packaged.yml",
+    "launch": "sam deploy --template-file ./packaged.yml --stack-name servers-lol --capabilities CAPABILITY_IAM",
     "invoke": "npm run build && sam local invoke --event event.json",
     "api": "npm run build && sam local start-api --port=4000",
     "test": "npm run eslint",
     "execute": "babel-node src/index.js",
+    "validate": "node dist/validate",
     "watch": "TEST=true nodemon --exec npm run execute"
   },
   "keywords": [],
@@ -34,7 +35,8 @@
     "jest": "^21.2.1",
     "nodemon": "^1.12.1",
     "pre-commit": "^1.2.2",
-    "prettier": "^1.7.4"
+    "prettier": "^1.7.4",
+    "yamljs": "^0.3.0"
   },
   "dependencies": {
     "aws-sdk": "^2.142.0",
