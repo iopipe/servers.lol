@@ -14,6 +14,7 @@ Resources:
         Variables:
           NODE_ENV: production
           PASSWORD: none
+          FRONTEND: https://servers.lol
       Events:
         GetResource:
           Type: Api

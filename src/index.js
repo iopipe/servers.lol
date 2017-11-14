@@ -56,10 +56,7 @@ async function getAllMetrics(envs = []) {
 }
 
 function redirect(event, context) {
-  let results = process.env.FRONTEND || 'https://servers.lol';
-  if (process.env.NODE_ENV !== 'production') {
-    results = 'http://localhost:3000';
-  }
+  const results = process.env.FRONTEND || 'https://servers.lol';
   const { PASSWORD: password } = process.env;
   context.succeed({
     body: `<html>
