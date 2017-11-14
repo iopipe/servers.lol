@@ -25,7 +25,7 @@ yarn && yarn run deploy
 Alternatively:
 
 ```bash
-npm install & npm run deploy
+npm install && npm run deploy
 ```
 
 ## Development
