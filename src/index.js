@@ -83,11 +83,7 @@ exports.handler = async function get(event, context) {
       .flatten()
       .value();
     const metrics = await getAllMetrics(envs);
-    const body = _.chain(metrics)
-      // limit results
-      // .map(obj => _.pick(obj, ['region', 'env', 'metrics']))
-      .thru(JSON.stringify)
-      .value();
+    const body = JSON.stringify(metrics);
     return context.succeed({
       body,
       headers: {
