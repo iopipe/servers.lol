@@ -10,7 +10,6 @@
     "eslint": "eslint src",
     "package": "sam package --template-file template.yml --s3-bucket servers-lol --output-template-file packaged.yml",
     "launch": "sam deploy --template-file ./packaged.yml --stack-name servers-lol --capabilities CAPABILITY_IAM",
-    "invoke": "npm run build && sam local invoke --event event.json",
     "api": "npm run build && sam local start-api --port=4000",
     "test": "npm run eslint",
     "execute": "babel-node src/index.js",
