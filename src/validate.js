@@ -19,7 +19,6 @@ try {
       'No PASSWORD environment variable supplied in the template.yml file'
     );
   }
-  console.log(password);
 } catch (err) {
   console.log('The validate script has encountered an error.');
   console.log((err && err.message) || 'Unknown error');

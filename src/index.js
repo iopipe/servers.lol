@@ -91,7 +91,6 @@ exports.handler = async function get(event = {}, context) {
   if (!enableData) {
     return redirect(event, context);
   }
-  console.log(process.env.PASSWORD);
   if (!password || !process.env.PASSWORD || password !== process.env.PASSWORD) {
     return noAuth(event, context);
   }
