@@ -4,7 +4,7 @@ What applications are a good fit for serverless? Which can utilize the benefits 
 
 ## What does it do?
 
-This project will launch a single lambda function behind API gateway in your environment that grabs some statistics about running Elastic Beanstalk environments. Don't have any Elastic Beanstalk apps? Just skip this repo and head over to [servers.lol](servers.lol) to enter in information manually.
+This project will launch a single lambda function behind API gateway in your environment that grabs some statistics about running Elastic Beanstalk environments. Don't have any Elastic Beanstalk apps? Just skip this repo and head over to [servers.lol](https://servers.lol) to enter in information manually.
 
 ## Requirements
 
