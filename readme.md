@@ -1,5 +1,7 @@
 # Servers.lol
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/iopipe/servers.lol.svg)](https://greenkeeper.io/)
+
 What applications are a good fit for serverless? Which can utilize the benefits of event-driven architecture, blazing-fast deployment times, incredible scalability, and decreased cost? Launch this [Serverless Application Model](https://github.com/awslabs/serverless-application-model) (SAM) repository to get started and find out!
 
 ## What does it do?
